@@ -11,7 +11,26 @@ void fillVector(int*vector, int n) {
 	}
 }
 
+void fillVectorDouble(double *vector, int n) {
+	for (int i = 0; i < n; i++) {
+		vector[i] = rand() % 100;
+	}
+}
+
 void showVector(int*vector, int n) {
+	printf("[");
+	for (int i = 0; i < n; i ++) {
+		if (i != n - 1) {
+			printf("%i ,", vector[i]);
+		} else {
+			printf("%i", vector[i]);
+		}
+
+	}
+	printf("]\n");
+}
+
+void showVectorDouble(double *vector, int n) {
 	printf("[");
 	for (int i = 0; i < n; i ++) {
 		if (i != n - 1) {
