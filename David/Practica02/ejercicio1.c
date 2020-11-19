@@ -1,14 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <mpi.h>
-#include <time.h>
-#include "vectores.h"
-#include<stdbool.h>
-#include<math.h>
-
-bool isOdd(int n){
-    return ((n%2) == 0) ?  false :  true;
-}
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <mpi.h>
+    #include <time.h>
+    #include "vectores.h"
+    #include<math.h>
 
 int main (int argc, char* argv[]) {
     int size = 0, rank = 0;
@@ -41,20 +36,21 @@ int main (int argc, char* argv[]) {
             scanf("%i",&numero_clientes);
         } while (numero_clientes <= 0);
 
-        MPI_Send(&numero_clientes,1,MPI_INT,1,12345,MPI_COMM_WORLD);
-        MPI_Send(&numero_clientes,1,MPI_INT,2,12345,MPI_COMM_WORLD);
-        MPI_Send(&numero_clientes,1,MPI_INT,3,12345,MPI_COMM_WORLD);
-
+        for(int i = 1; i < size; i++){
+            MPI_Send(&numero_clientes,1,MPI_INT,i,12345,MPI_COMM_WORLD);
+            MPI_Send(&numero_clientes,1,MPI_INT,i,12345,MPI_COMM_WORLD);
+            MPI_Send(&numero_clientes,1,MPI_INT,i,12345,MPI_COMM_WORLD);
+        }
  
         ingresos = (int*) calloc(numero_clientes, sizeof(int));
         gastos = (int*) calloc(numero_clientes, sizeof(int));
  
-        fillVector(ingresos,numero_clientes);
-        fillVector(gastos,numero_clientes);
+        fillVector_int(ingresos,numero_clientes);
+        fillVector_int(gastos,numero_clientes);
         printf("Vector ingresos\n");
-        showVector(ingresos,numero_clientes);
+        showVector_int(ingresos,numero_clientes);
         printf("Vector gastos\n");
-        showVector(gastos,numero_clientes);
+        showVector_int(gastos,numero_clientes);
         printf("\n");
  
         // Enviamos los fragmentos de los vectores al core 1
@@ -92,7 +88,6 @@ int main (int argc, char* argv[]) {
         for(int i = 0; i < round(index); i++){
             MPI_Recv(&ingreso, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
             MPI_Recv(&gasto, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
-            printf(" %d-%d ",rank, ingreso);
             total_ingresos += ingreso;
             total_gastos += gasto;
         }
@@ -101,7 +96,6 @@ int main (int argc, char* argv[]) {
         MPI_Send(&total_gastos, 1, MPI_INT, 0, 123, MPI_COMM_WORLD);
 
     } else if (rank == 2) {
-       // if((numero_clientes%3)==2) numero_clientes++;
         MPI_Recv(&numero_clientes,1,MPI_INT,0,12345,MPI_COMM_WORLD,&status);
 
         int ingreso;
@@ -110,7 +104,6 @@ int main (int argc, char* argv[]) {
         for(int i = 0; i < round(index); i++){
             MPI_Recv(&ingreso, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
             MPI_Recv(&gasto, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
-            printf(" %d-%d ", rank, ingreso);
             total_ingresos += ingreso;
             total_gastos += gasto;
         }
@@ -128,7 +121,6 @@ int main (int argc, char* argv[]) {
 
             MPI_Recv(&ingreso, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
             MPI_Recv(&gasto, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
-            printf(" %d-%d ", rank, ingreso);
             total_ingresos += ingreso;
             total_gastos += gasto;
         }
