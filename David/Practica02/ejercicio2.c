@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv) {
     int n, rank, size;
-    double *vector_entrada, *vector_salida, elementos;
+    double *vector_entrada, *vector_salida, elementos, *minimos;
     srand(time(NULL));
 
     MPI_Init(&argc, &argv);
@@ -15,7 +15,6 @@ int main(int argc, char **argv) {
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
     MPI_Status status;
     
-
     if(rank==0){
         do {
             printf("Introduce el tamaño del vector: ");
@@ -29,41 +28,57 @@ int main(int argc, char **argv) {
         }
         
         vector_entrada = (double*) calloc(n, sizeof(double));
-        printf("-%d-", rank);
         
         elementos = (double)n / (double)size;
         if((elementos/0.5)==elementos*2) elementos += 0.1;  
 
         vector_salida = (double*) calloc((int)round(elementos), sizeof(double));
 
-
         fillVector_double(vector_entrada, n);
         showVector_double(vector_entrada, n);
 
 
-        //Mejorar el factor de % para , si se puede, repartir mejor la carga reduciendo ny repartir los 0 entre varios nucleos
 
         MPI_Scatter(vector_entrada, (int)round(elementos), MPI_DOUBLE, vector_salida, (int)round(elementos), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        printf("\n");
-        showVector_double(vector_salida, (int)round(elementos));
-
-        free(vector_entrada);
-        free(vector_salida);
-
-    }else {
         
         printf("-%d-", rank);
+        showVector_double(vector_salida, (int)round(elementos));
+        
+
+    }else {        
         MPI_Recv(&n, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
         elementos = (double)n / (double)size;
+
         if((elementos/0.5)==elementos*2) elementos += 0.1; 
         
         vector_salida = (double*) calloc((int)round(elementos), sizeof(double));
 
         MPI_Scatter(vector_entrada, (int)round(elementos), MPI_DOUBLE, vector_salida, (int)round(elementos), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
+        
+        printf("-%d-", rank);
         showVector_double(vector_salida, (int)round(elementos));
-        free(vector_salida);
+
     }
+
+        minimos = (double*) calloc((int)round(elementos), sizeof(double));
+
+    MPI_Reduce(vector_salida, minimos, (int)round(elementos), MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+
+
+
+    if(rank ==0){
+
+        printf("Minimos\n");
+        showVector_double(minimos, 4);
+
+        free(vector_entrada);
+    
+    }
+
+    
+    free(vector_salida);
+    free(minimos);
+    
     MPI_Finalize();
     return 0;
 }
