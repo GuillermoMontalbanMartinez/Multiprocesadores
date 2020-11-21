@@ -51,7 +51,6 @@ int main (int argc, char* argv[]) {
         for(int i = 1; i < size; i++){
             MPI_Send(&clientes_core, 1, MPI_INT, i, 111, MPI_COMM_WORLD);
             MPI_Send(&resto, 1, MPI_INT, i, 111, MPI_COMM_WORLD);
-            MPI_Send(&numero_clientes, 1, MPI_INT, i, 111, MPI_COMM_WORLD);
 
         }
 
@@ -62,7 +61,6 @@ int main (int argc, char* argv[]) {
     if(rank != 0){
         MPI_Recv(&clientes_core, 1, MPI_INT, 0, 111, MPI_COMM_WORLD, &status);
         MPI_Recv(&resto, 1, MPI_INT, 0, 111, MPI_COMM_WORLD, &status);
-        MPI_Recv(&numero_clientes, 1, MPI_INT, 0, 111, MPI_COMM_WORLD, &status);
 
     }
     
@@ -90,18 +88,17 @@ int main (int argc, char* argv[]) {
         showVector_int(ingresos,numero_clientes);
         printf("Vector gastos\n");
         showVector_int(gastos,numero_clientes);
-        printf("\n");        
+
     }
 
     rec_ing = (int*)calloc(tam[rank] , sizeof(int));
     rec_gas = (int*)calloc(tam[rank] , sizeof(int));    
     
-    MPI_Scatterv(ingresos, tam, ini, MPI_INT, rec_ing, numero_clientes, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Scatterv(gastos, tam, ini, MPI_INT, rec_gas, numero_clientes, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(ingresos, tam, ini, MPI_INT, rec_ing, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(gastos, tam, ini, MPI_INT, rec_gas, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 
    // print what each process received and compute 
-    printf("Process %d: ", rank);
     for (int i = 0; i < tam[rank]; i++) {
         total_ingresos += rec_ing[i];
         total_gastos += rec_gas[i];
@@ -109,7 +106,6 @@ int main (int argc, char* argv[]) {
         rec_gas[i]+=2;
     }
 
-    printf("\n");
     if(rank!=0){
         MPI_Send(&total_ingresos, 1, MPI_INT, 0, 123, MPI_COMM_WORLD);
         MPI_Send(&total_gastos, 1, MPI_INT, 0, 123, MPI_COMM_WORLD);
