@@ -98,7 +98,6 @@ int main (int argc, char* argv[]) {
     MPI_Scatterv(gastos, tam, ini, MPI_INT, rec_gas, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 
-   // print what each process received and compute 
     for (int i = 0; i < tam[rank]; i++) {
         total_ingresos += rec_ing[i];
         total_gastos += rec_gas[i];
@@ -112,7 +111,6 @@ int main (int argc, char* argv[]) {
     }
 
     if(rank == 0){      
-        // Recibimos los mensajes con la suma, en este caso del cliente falta añadir el gasto
         for (int i = 1; i < size; i++) {
             int ingreso = 0, gasto = 0;
             MPI_Recv(&ingreso, 1, MPI_INT, i, 123, MPI_COMM_WORLD, &status);
