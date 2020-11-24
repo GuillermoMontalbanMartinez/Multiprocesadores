@@ -7,15 +7,17 @@
 
 int main (int argc, char* argv[]) {
     int size = 0, rank = 0;
-    int n;
+    int n = 0;
     int n_core = 0;
     int resto = 0;
+    int *local_escalar = NULL;
+    int *escalar = NULL;
+    int *a = NULL;
+    int *b = NULL;
+    int *local_a = NULL;
+    int *local_b = NULL;
     int *tam = NULL;
     int *ini = NULL;
-    double *global_data;
-    double *local_data;
-    double min;
-    double resultado;
  
     srand(time(NULL)); // Numero enteros aleatorios
  
@@ -30,18 +32,18 @@ int main (int argc, char* argv[]) {
         exit(0);
     }
 
+    
+    if(argc != 2){
+        printf("Lance el programa con el siguiente formato : mpirun -np 4 ./ejercicio3 <int>\n");
+        MPI_Finalize();
+        exit(0);
+    }
+
     tam = (int*)calloc(size,sizeof(int));
     ini = (int*)calloc(size,sizeof(int));
- 
+
     if (rank == 0) {
- 
-        do {
-            printf("Ingrese el número de clientes de la empresa: ");
-            fflush(stdin);
-            fflush(stdout);
-            scanf("%i",&n);
-        } while (n <= 0);
-        
+        n = atoi(argv[1]);       
         n_core = n / size;
         resto = n % size;
 
@@ -60,7 +62,8 @@ int main (int argc, char* argv[]) {
     
     int aux = 0;    
     for(int i = 0; i < size; i++){
-        ini[i] = aux;        
+        ini[i] = aux;
+        
         tam[i] = n_core;
         if(resto != 0){
             tam[i]++;
@@ -71,33 +74,46 @@ int main (int argc, char* argv[]) {
 
 
     if(rank == 0){        
+ 
+        a = (int*) calloc(n, sizeof(int));
+        b = (int*) calloc(n, sizeof(int));
+        escalar = (int*) calloc(n, sizeof(int));
+        fillVector_int(a, n);
+        printf("Vector A\n");
+        showVector_int(a, n);
 
-        global_data = (double*) calloc(n, sizeof(double)); 
-        fillVector_double(global_data, n);
-        printf("Vector");
-        showVector_double(global_data, n);
+        fillVector_int(b, n);
+        printf("Vector B\n");
+        showVector_int(b, n);
+
     }
 
-    local_data = (double*)calloc(tam[rank] , sizeof(double));
+    local_a = (int*)calloc(tam[rank] , sizeof(int));
+    local_b = (int*)calloc(tam[rank] , sizeof(int));
+    local_escalar = (int*)calloc(tam[rank] , sizeof(int));
+
     
-    MPI_Scatterv(global_data, tam, ini, MPI_DOUBLE, local_data, tam[rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(a, tam, ini, MPI_INT, local_a, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(b, tam, ini, MPI_INT, local_b, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
 
-    min = findMin_double(local_data, tam[rank]);
-    MPI_Reduce(&min, &resultado, 1, MPI_DOUBLE, MPI_MIN, 2, MPI_COMM_WORLD);
-
-    if(rank == 2){      
-        printf("El valor minimo del vector es: %1.1f\n", resultado);          
-    }   
-    
-
-    if(rank==0){
-
-        free(global_data);
+    for(int i = 0; i < tam[rank]; i++){
+        local_escalar[i] = local_a[i] * local_b[i];
     }
-    free(local_data);
-    free(tam);
-    free(ini);
+    
+    MPI_Gatherv(local_escalar, tam[rank], MPI_INT, escalar, tam, ini, MPI_INT,0, MPI_COMM_WORLD);    
+    
+    if(rank == 0){
+        printf("El producto escalar de los vectores A y B es el siguiente vector\n");
+        showVector_int(escalar, n);
+        free(escalar);
+    }
+
     MPI_Finalize();
     
+    free(local_a);
+    free(local_b);
+    free(tam);
+    free(ini);
+
     return 0;
 }

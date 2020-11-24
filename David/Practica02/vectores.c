@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <mpi.h>
 #include "vectores.h"
 
 void fillVector_int(int *vector, int n) {

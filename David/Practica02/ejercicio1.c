@@ -1,9 +1,9 @@
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <mpi.h>
-    #include <time.h>
-    #include "vectores.h"
-    #include<math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+#include <time.h>
+#include "vectores.h"
+#include<math.h>
 
 int main (int argc, char* argv[]) {
     int size = 0, rank = 0;
@@ -15,8 +15,8 @@ int main (int argc, char* argv[]) {
     int diferencia_gastos_ingresos = 0;
     int *ingresos = NULL;
     int *gastos = NULL;
-    int *rec_ing = NULL;
-    int *rec_gas = NULL;
+    int *recv_ing = NULL;
+    int *recv_gas = NULL;
     int *tam = NULL;
     int *ini = NULL;
  
@@ -28,7 +28,7 @@ int main (int argc, char* argv[]) {
     MPI_Status status; // Flag de finalización del proceso
  
     if (size != 4) {
-        printf("El programa está pensado para ser ejecutado con 2 nucleos. \n Repita la ejecución utilizando este número de nucleos \n");
+        printf("El programa está pensado para ser ejecutado con 4 nucleos. \n Repita la ejecución utilizando este número de nucleos \n");
         MPI_Finalize();
         exit(0);
     }
@@ -91,18 +91,18 @@ int main (int argc, char* argv[]) {
 
     }
 
-    rec_ing = (int*)calloc(tam[rank] , sizeof(int));
-    rec_gas = (int*)calloc(tam[rank] , sizeof(int));    
+    recv_ing = (int*)calloc(tam[rank] , sizeof(int));
+    recv_gas = (int*)calloc(tam[rank] , sizeof(int));    
     
-    MPI_Scatterv(ingresos, tam, ini, MPI_INT, rec_ing, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Scatterv(gastos, tam, ini, MPI_INT, rec_gas, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(ingresos, tam, ini, MPI_INT, recv_ing, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(gastos, tam, ini, MPI_INT, recv_gas, tam[rank], MPI_INT, 0, MPI_COMM_WORLD);
 
 
     for (int i = 0; i < tam[rank]; i++) {
-        total_ingresos += rec_ing[i];
-        total_gastos += rec_gas[i];
-        rec_ing[i]*= 2;
-        rec_gas[i]+=2;
+        total_ingresos += recv_ing[i];
+        total_gastos += recv_gas[i];
+        recv_ing[i]*= 2;
+        recv_gas[i]+=2;
     }
 
     if(rank!=0){
@@ -130,8 +130,8 @@ int main (int argc, char* argv[]) {
     }   
     
     
-    free(rec_ing);
-    free(rec_gas);
+    free(recv_ing);
+    free(recv_gas);
     free(tam);
     free(ini);
  
