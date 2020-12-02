@@ -27,11 +27,6 @@ int main (int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); // ID del nucleo que estamos usando
     MPI_Status status; // Flag de finalización del proceso
  
-    if (size != 4) {
-        printf("El programa está pensado para ser ejecutado con 4 nucleos. \n Repita la ejecución utilizando este número de nucleos \n");
-        MPI_Finalize();
-        exit(0);
-    }
 
     tam = (int*)calloc(size,sizeof(int));
     ini = (int*)calloc(size,sizeof(int));
@@ -101,8 +96,7 @@ int main (int argc, char* argv[]) {
     for (int i = 0; i < tam[rank]; i++) {
         total_ingresos += recv_ing[i];
         total_gastos += recv_gas[i];
-        recv_ing[i]*= 2;
-        recv_gas[i]+=2;
+        
     }
 
     if(rank!=0){

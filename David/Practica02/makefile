@@ -11,7 +11,7 @@ ejercicio3:
 	$(CC) vectores.c ejercicio3.c -o ejercicio3  $(LIBS)
 
 ejercicio4:
-	$(CC) vectores.c ejercicio4.c -o ejercicio4  $(LIBS)
+	$(CC) vectores.c Matrices.c ejercicio4.c -o ejercicio4  $(LIBS)
 
 ejercicio5:
 	$(CC) vectores.c ejercicio5.c -o ejercicio5  $(LIBS)
