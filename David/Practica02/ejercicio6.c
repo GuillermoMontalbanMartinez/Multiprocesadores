@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stddef.h> 
 #include <mpi.h>
+#include<stdbool.h>
 
 #define n_paises 13
 #define char_len 20
@@ -79,84 +80,108 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
     
-        paises global_data [n_paises]= {
-                {"España", "Madrid"},
-                {"Inglaterra", "Londres"}, 
-                {"Francia", "París"}, 
-                {"Alemania", "Bonn"}, 
+        paises global_data[n_paises];
+        strcpy(global_data[0].nombre_pais,"España");
+		strcpy(global_data[0].capital_del_pais,"Madrid");
 
-                {"India", "Nueva Delhi"}, 
-                {"Israel", "Jerusalén"}, 
-                {"Italia", "Roma"},
+		strcpy(global_data[1].nombre_pais,"Inglaterra");
+		strcpy(global_data[1].capital_del_pais,"Londres");
 
-                {"Japón", "Tokio"}, 
-                {"Méjico", "Ciudad de Méjico"}, 
-                {"China", "Pekín"}, 
-                
-                {"Rusi", "Moscú"}, 
-                {"Estados Unidos", "Washintong"}, 
-                {"Canadá", "Ottawa"}
-        };
+		strcpy(global_data[2].nombre_pais,"Francia");
+		strcpy(global_data[2].capital_del_pais,"París");
+
+		strcpy(global_data[3].nombre_pais,"Alemania");
+		strcpy(global_data[3].capital_del_pais,"Bonn");
+
+		strcpy(global_data[4].nombre_pais,"India");
+		strcpy(global_data[4].capital_del_pais,"NuevaDelhi");
+
+		strcpy(global_data[5].nombre_pais,"Israel");
+		strcpy(global_data[5].capital_del_pais,"Jerusalén");
+
+		strcpy(global_data[6].nombre_pais,"Italia");
+		strcpy(global_data[6].capital_del_pais,"Roma");
+
+		strcpy(global_data[7].nombre_pais,"Japón");
+		strcpy(global_data[7].capital_del_pais,"Tokio");
+
+		strcpy(global_data[8].nombre_pais,"Méjico");
+		strcpy(global_data[8].capital_del_pais,"CiudadDeMéjico");
+
+		strcpy(global_data[9].nombre_pais,"China");
+		strcpy(global_data[9].capital_del_pais,"Pekín");
+
+		strcpy(global_data[10].nombre_pais,"Rusi");
+		strcpy(global_data[10].capital_del_pais,"Moscú");
+
+		strcpy(global_data[11].nombre_pais,"EstadosUnidos");
+		strcpy(global_data[11].capital_del_pais,"Washington");
+
+		strcpy(global_data[12].nombre_pais,"Canadá");
+		strcpy(global_data[12].capital_del_pais,"Ottwa");
     }
 
     paises local_data[tam[rank]];
     MPI_Scatterv(&global_data, tam, ini, MPI_PAIS, &local_data, tam[rank], MPI_PAIS, 0, MPI_COMM_WORLD);
       
     
+    do{
+
+        MPI_Barrier(MPI_COMM_WORLD);
 
         if(rank==0) {
 		
-			printf("Introduce el nombre del país: ");
+			printf("Introduce el nombre o capital del país: ");
 			fflush(stdin);
 			fflush(stdout);
 			scanf("%s", nombre);
             for(int i = 1; i<size;i++){
                 MPI_Send(&nombre, char_len, MPI_CHAR, i, 101, MPI_COMM_WORLD);
             }
+            printf("\n");
         }
+        
         if(rank!=0){
 
             MPI_Recv(&nombre, char_len, MPI_CHAR, 0, 101, MPI_COMM_WORLD, &status);
 
         }        
         
-
+        bool encontrado = false;
         for(int i = 0; i<tam[rank]; i++){                
             if(strcmp(nombre, local_data[i].nombre_pais) == 0){
-
-                if(rank==1){
-                    printf("\nProcesador %d, Pais: %s Capital: %s\n",rank, local_data[i].nombre_pais, local_data[i].capital_del_pais);
-                    MPI_Send(&local_data[i].capital_del_pais, char_len, MPI_CHAR, 1, 12321, MPI_COMM_WORLD);
-
-                   
-                 
-                }else{
-                    
-                    /*strcpy(aux[0].nombre_pais, local_data[i].nombre_pais);
-                    strcpy(aux[0].capital_del_pais, local_data[i].capital_del_pais);
-                    printf("\nProcesador %d, Pais: %s Capital: %s\n",rank, aux[0].nombre_pais, aux[0].capital_del_pais);
-                    MPI_Send(&aux, 1, MPI_PAIS, 1, 123, MPI_COMM_WORLD);
-                    strcpy(resultado, "si");
-                    */
-                    MPI_Send(&local_data[i].capital_del_pais, char_len, MPI_CHAR, 1, 12321, MPI_COMM_WORLD);
-
-                }
-            }else{
-                MPI_Send("no", char_len, MPI_CHAR, 1, 12321, MPI_COMM_WORLD);
-            }    
-             
-            
+                encontrado = true;
+                MPI_Send(&local_data[i].capital_del_pais, char_len, MPI_CHAR, 1, 12321, MPI_COMM_WORLD);
+            }
+   
+            if(strcmp(nombre, local_data[i].capital_del_pais) == 0){
+                encontrado = true;
+                MPI_Send(&local_data[i].nombre_pais, char_len, MPI_CHAR, 1, 12321, MPI_COMM_WORLD);
+            }            
         }
 
-        if(rank==1){
-            for(int i = 0; i < size; i++){
-                MPI_Recv(&nombre, char_len, MPI_CHAR, MPI_ANY_SOURCE, 12321, MPI_COMM_WORLD, &status);
-                if(strcmp(nombre, "no")!=0){
-                    printf("%s", nombre);   
-                }
-            }              
+        if(!encontrado){
+            MPI_Send("no", char_len, MPI_CHAR, 1, 12321, MPI_COMM_WORLD);            
         }
+
+
+        MPI_Barrier(MPI_COMM_WORLD);
+
         
+        if(rank==1){
+            if(strcmp(nombre, "fin")!=0){
+                for(int i = 0; i<size; i++){
+                    MPI_Recv(&resultado, char_len, MPI_CHAR, MPI_ANY_SOURCE, 12321, MPI_COMM_WORLD, &status);
+                    if(strcmp(resultado, "no") != 0){
+                        printf("\n%s -> %s\n",nombre, resultado);
+                    }
+                }
+            }
+
+        }
+
+        
+    }while(strcmp(nombre,"fin")!=0);
     
       
     MPI_Type_free(&MPI_PAIS);
