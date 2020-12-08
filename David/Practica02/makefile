@@ -19,8 +19,11 @@ ejercicio5:
 ejercicio6:
 	$(CC) vectores.c ejercicio6.c -o ejercicio6  $(LIBS)
 
-ejercicio7:
-	$(CC) vectores.c ejercicio7.c -o ejercicio7  $(LIBS)
+ejercicio7_paralelo:
+	$(CC) vectores.c ejercicio7_paralelo.c -o ejercicio7_paralelo $(LIBS)
+
+ejercicio7_secuencial:
+	gcc vectores.c ejercicio7_secuencial.c -o ejercicio7_secuencial $(LIBS)
 
 clean:
 	$(RM) ejercicio1
@@ -29,4 +32,5 @@ clean:
 	$(RM) ejercicio4
 	$(RM) ejercicio5
 	$(RM) ejercicio6
-	$(RM) ejercicio7
+	$(RM) ejercicio7_paralelo
+	$(RM) ejercicio7_secuencial	

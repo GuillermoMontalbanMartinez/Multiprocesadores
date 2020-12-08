@@ -5,6 +5,12 @@
 
 double calcular_coseno(double *a, double *b, int n){
 
+             /*
+
+              FORMULA DEL COSENO
+                AixBi / |Ai||Bi|
+                
+            */
     double cos, cosAux, producto, raizA, raizB, potenciaA, potenciaB;
     cos =cosAux = producto = raizA = raizB = potenciaA = potenciaB =0.0;
 
