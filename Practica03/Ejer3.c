@@ -8,16 +8,30 @@ pthread_mutex_t mutex;
 int sum=0;
 typedef struct Data{
     int **matrix;
-    int row;
+    int n_elements;
     int start;
     int end;
 }data;
 
-void *sum_matrix(void *arg){
+void *sum_matrix_filas(void *arg){
     data *datos = (data*)arg;  
     
     for(int i = datos->start; i < datos->end; i++){
-        for(int j = 0; j < datos->row; j++){
+        for(int j = 0; j < datos->n_elements; j++){
+            pthread_mutex_lock(&mutex);
+            sum+= datos->matrix[i][j];
+            pthread_mutex_unlock(&mutex);
+        }       
+        
+    }
+    
+}
+
+void *sum_matrix_columnas(void *arg){
+    data *datos = (data*)arg;  
+    
+    for(int j = 0; j < datos->n_elements; j++){
+        for(int i = datos->start; i < datos->end; i++){
             pthread_mutex_lock(&mutex);
             sum+= datos->matrix[i][j];
             pthread_mutex_unlock(&mutex);
@@ -53,47 +67,35 @@ int main(int argc, char **argv) {
 
     datos = (data*) malloc(sizeof(data)*n_threads);
     matrix = reservarMatriz(row, col);
-    llenarMatrizAleatoria(row, col, matrix, 0, 9);
+    llenarMatrizAleatoria(row, col, matrix, 0, 1);
 
-    if(opcion == 0){
-        int**aux;
-        aux = reservarMatriz(col, row);
-        for(int i = 0; i < row; i++){
-            for (int j = 0; j < col; j++){
-                aux[j][i] = matrix[i][j];
-            }
-        }
-
-        liberarMatriz(matrix);
-        matrix = reservarMatriz(col, row);
-        for(int i = 0; i < row; i++){
-            for (int j = 0; j < col; j++){
-                matrix[i][j] = aux[i][j];
-            }
-        }
-        liberarMatriz(aux);
-        
-    }
-
-    pack = col/n_threads;
-    offset = col % n_threads;
+    pack = row/n_threads;
+    offset = row % n_threads;
  
     pthread_t *threads = malloc(sizeof(pthread_t)*n_threads);
     pthread_mutex_init(&mutex, 0);
 
    
-
+    int pos=0;
     for(int i = 0; i < n_threads; i++){
         datos[i].matrix = matrix;
-        datos[i].start = i*pack;
-        datos[i].end = i*pack + pack;
-        datos[i].row = col;
+        datos[i].start = pos;
+        datos[i].n_elements = col;
         if(offset!=0){
-            datos[i].row=row+1;
+            pos+=pack+1;
             offset--;
+        } else{
+            pos += pack;
+        }
+        datos[i].end = pos;
+
+        if(opcion==0){
+            pthread_create(&threads[i], 0, sum_matrix_filas, &datos[i]); 
+        }
+        if(opcion==1){
+            pthread_create(&threads[i], 0, sum_matrix_columnas, &datos[i]); 
         }
 
-        pthread_create(&threads[i], 0, sum_matrix, &datos[i]); 
 
         for(int i = 0; i<n_threads; i++){
 			pthread_join(threads[i], 0);
