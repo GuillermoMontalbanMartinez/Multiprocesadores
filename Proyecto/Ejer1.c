@@ -48,8 +48,12 @@ int main(int argc, char* argv[]) {
             fflush(stdout);
             scanf("%d",&columna_matriz_b);
         } while (columna_matriz_b <= 0);
+
+        if (columna_matriz_a != fila_matriz_b) {
+            printf("\nERROR: No se puede multiplicar matrices si la columnas de la matriz A es distinta a las filas de la matriz B\n\n");
+        }
         
-    } while (fila_matriz_a != columna_matriz_b);
+    } while (columna_matriz_a != fila_matriz_b);
 
     matriz_a = reservarMatriz(fila_matriz_a, columna_matriz_a);
     matriz_b = reservarMatriz(fila_matriz_b, columna_matriz_b);

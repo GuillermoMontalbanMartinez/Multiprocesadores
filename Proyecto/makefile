@@ -1,12 +1,17 @@
-cc = gcc
-CFLGAS = -g
-LIBS = -lm
-RM = rm -f
+# Macros
+CC	=	gcc
+CFLAGS	=	-g 
+SRC = Ejer1.c vectores.c vectores.h
+OBJ = Ejer1.o vectores.o
+LIBS	=	-lm
+RM	=	rm -f
 
+# Reglas explícitas
 all: $(OBJ)
-
-Programa1:
-    $(CC) vectores.c Ejer1.c -o Programa1 $
-
+	$(CC)	$(CFLAGS) -o Programa1 $(OBJ)
 clean:
-    $(RM) Programa1
+	$(RM)	$(OBJ) Programa1
+
+# Reglas implícitas
+vectores.o: vectores.c vectores.h
+Ejer1.o: Ejer1.c vectores.h
