@@ -154,9 +154,8 @@ int main (int argc, char* argv[]) {
     MPI_Scatterv(vector_auxA, tam, ini, MPI_DOUBLE, local_data, tam[rank], MPI_DOUBLE, 0, MPI_COMM_WORLD); 
 
     filas_aux = tam[rank] / columnasA ;
-    
 
-    producto = reservarMatriz(filas_aux, columnasB);
+    producto = reservarMatriz(filasA, columnasB);
     
     local_matrixA = reservarMatriz(filas_aux, columnasA);
     int aux=0;
@@ -181,39 +180,41 @@ int main (int argc, char* argv[]) {
 
     int index = 0;
 
-    for(int i = 0; i < columnasB; i++){
-        for(int j = 0; j < filas_aux; j++){
-            int suma = 0;
+    for(int i = 0; i < filas_aux; i++){
+        for(int j = 0; j < columnasB; j++){
+            double suma = 0;
           
             for(int k = 0; k < columnasA; k++){
-                suma+= local_matrixA[j][k] * local_matrixB[k][i];
+                suma+= local_matrixA[i][k] * local_matrixB[k][j];
                 
             }
             
             producto[j][i] = suma;
         }
-    }   
-    pos=0;
-    double *vec_producto = (double*)calloc(filas_aux*columnasB, sizeof(double));
-            for(int i = 0; i < filas_aux; i++){
-                for(int j = 0; j < columnasB; j++){
-                    vec_producto[pos++] = producto[i][j];
-
-                }
-            }
+    }  
 
     
-    if(!(local_matrixA[0][0]< -1 || local_matrixA[0][0]> 11)){
+    pos=0;
+    double *vec_producto = (double*)calloc(filasA*columnasB, sizeof(double));
+    for(int i = 0; i < filasA; i++){
+        for(int j = 0; j < columnasB; j++){
+            vec_producto[pos++] = producto[i][j];
+
+        }
+    }
+
+    
+    if(!(local_matrixA[0][0]< -11 || local_matrixA[0][0]> 11)){
         
-        min = findMin_double(vec_producto, columnasB);
+        min = (double)findMin_double(vec_producto, columnasB);
     } else{
-        min = 99999;
+        min = 99999.0;
     }
 
     MPI_Reduce(&min, &resultado, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 
 
-     
+    
     if(rank==0){
         printf("\nMinimo: %1.1f \n", resultado);          
 
@@ -235,6 +236,7 @@ int main (int argc, char* argv[]) {
        free(producto[i]);                
     }
     free(producto); 
+    
     MPI_Finalize();
     
     return 0;
