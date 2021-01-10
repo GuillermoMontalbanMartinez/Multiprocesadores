@@ -155,7 +155,7 @@ int main (int argc, char* argv[]) {
 
     filas_aux = tam[rank] / columnasA ;
 
-    producto = reservarMatriz(filasA, columnasB);
+    producto = reservarMatriz(filas_aux, columnasB);
     
     local_matrixA = reservarMatriz(filas_aux, columnasA);
     int aux=0;
@@ -180,8 +180,8 @@ int main (int argc, char* argv[]) {
 
     int index = 0;
 
-    for(int i = 0; i < filas_aux; i++){
-        for(int j = 0; j < columnasB; j++){
+    for(int j = 0; j < columnasB; j++){
+        for(int i = 0; i < filas_aux; i++){
             double suma = 0;
           
             for(int k = 0; k < columnasA; k++){
@@ -189,24 +189,14 @@ int main (int argc, char* argv[]) {
                 
             }
             
-            producto[j][i] = suma;
+            producto[i][j] = suma;
         }
     }  
 
     
-    pos=0;
-    double *vec_producto = (double*)calloc(filasA*columnasB, sizeof(double));
-    for(int i = 0; i < filasA; i++){
-        for(int j = 0; j < columnasB; j++){
-            vec_producto[pos++] = producto[i][j];
-
-        }
-    }
-
-    
     if(!(local_matrixA[0][0]< -11 || local_matrixA[0][0]> 11)){
         
-        min = (double)findMin_double(vec_producto, columnasB);
+        min = encontrarMinimo(filas_aux, columnasB, producto);
     } else{
         min = 99999.0;
     }
@@ -226,7 +216,6 @@ int main (int argc, char* argv[]) {
     free(ini);
     free(tam);
     free(vector_auxB);
-    free(vec_producto);
      for(int i = 0; i < filas_aux; i++){
        free(local_matrixA[i]);                
     }
