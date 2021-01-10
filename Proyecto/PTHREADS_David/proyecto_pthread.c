@@ -37,7 +37,7 @@ void *multiply_matrix(void *args){
 
 int main(int argc, char **argv){
     srand(time(NULL));
-    int columnasA, columnasB, filasA, filasB, n_threads, *pack, offset;
+    int columnasA, columnasB, filasA, filasB, n_threads, pack, offset;
     double **matrixA, **matrixB;   
     data *datos;
 
@@ -72,9 +72,7 @@ int main(int argc, char **argv){
     
     final_matrix = reservarMatriz(filasA, columnasB);
 
-    pack = (int*)malloc(n_threads*sizeof(int));
-
-    int aux = filasA/n_threads;
+    pack = filasA/n_threads;
     offset = filasA % n_threads;
 
    
@@ -104,7 +102,7 @@ int main(int argc, char **argv){
         datos[i].columnasA = columnasA;
         datos[i].filasA = columnasA;
         datos[i].ini = pos;
-        fin = pos + aux;
+        fin = pos + pack;
         if(offset!=0){
             fin++;
             offset--;
